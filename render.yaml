@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: event-booking-api
+    env: python
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: event-booking-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: event-booking-redis
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: "noreply@eventbooking.dev"
+
+  - type: worker
+    name: event-booking-worker
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A app.tasks.celery_app worker --loglevel=info"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: event-booking-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: event-booking-redis
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: "noreply@eventbooking.dev"
+
+databases:
+  - name: event-booking-db
+    plan: free
+
+  - name: event-booking-redis
+    plan: free
+    ipAllowList: []
