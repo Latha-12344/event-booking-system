@@ -11,6 +11,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
+          type: redis
           name: event-booking-redis
           property: connectionString
       - key: JWT_SECRET_KEY
@@ -32,6 +33,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
+          type: redis
           name: event-booking-redis
           property: connectionString
       - key: JWT_SECRET_KEY
@@ -41,10 +43,11 @@ services:
       - key: EMAIL_FROM
         value: "noreply@eventbooking.dev"
 
+  - type: redis
+    name: event-booking-redis
+    plan: free
+    ipAllowList: []
+
 databases:
   - name: event-booking-db
     plan: free
-
-  - name: event-booking-redis
-    plan: free
-    ipAllowList: []
