@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, get_db
 from app.main import app
 from app.tasks.celery_app import celery_app
+from app.tasks import email_tasks
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -18,6 +19,9 @@ def configure_celery():
     """Ensure Celery runs in eager mode during testing to prevent broker calls."""
     celery_app.conf.task_always_eager = True
     celery_app.conf.task_eager_propagates = True
+    with patch.object(email_tasks, "send_booking_confirmation_email", return_value={"id": "test"}), \
+        patch.object(email_tasks, "send_event_update_email", return_value={"id": "test"}):
+        yield
 
 
 @pytest.fixture(autouse=True)
